@@ -1,15 +1,77 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Page Title</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
-    <script src='main.js'></script>
-</head>
-<body>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <script src="main.js"></script>
+  </head>
+  <body>
     <div id="top"><h1>Komputer store</h1></div>
-    
-</body>
+    <div id="stores">
+      <div class="storeContainer">
+        <h2>Joe Banker</h2>
+        <div id="balanceContainer">Balance:</div>
+        <div id="debtContainer"></div>
+
+        <button onclick="loanRequest()" id="loan">Get a loan</button>
+      </div>
+      <div class="storeContainer">
+        <h2>Work</h2>
+        <div id="payContainer">Pay 0 kr</div>
+        <div id="workButtonsContainer">
+          <button id="bank">Bank</button>
+          <button id="work" onclick="work()">Work</button>
+        </div>
+      </div>
+      <div class="storeContainer">
+        <h2>Laptops</h2>
+        <div id="balanceContainer">dropdown</div>
+
+        <div id="features">Features:</div>
+      </div>
+    </div>
+    <script>
+      let debt = 0;
+      let loanAmount = 0;
+      let balance = 350;
+      //start with no debt and 350 balance
+      let maxLoan = balance*2
+      //set the loan limit to twice of current balance
+      document.getElementById("balanceContainer").innerHTML = "Balance: "+balance;
+      //initialize balance
+      function loanRequest(){
+          //function activated by loan button
+        loanAmount = prompt("Please enter how much you want to loan",maxLoan)
+            if (isNaN(loanAmount)) {
+                alert("Please type a valid number !!!");
+            }
+          else if (debt>0) {
+              alert("You are already in debt !!!");
+              //First priority is to not allow a second loan
+          }
+          
+          else if (loanAmount>maxLoan){
+              alert("Maximum loan amount is twice your balance !!!");
+              //Second test is the loan amount
+          }
+          else{
+            loanAmount = parseInt(loanAmount)
+              debt = loanAmount;
+              balance =(balance+loanAmount);
+              document.getElementById("debtContainer").innerHTML = "Debt: "+debt;
+              document.getElementById("balanceContainer").innerHTML = "Balance: "+balance;
+              //loan successfull, update variables and add them to HTML page
+          }
+      }
+      let pay = 0;
+      function work(){
+          if (debt==0){pay+=100}
+          else{pay+=90}
+          document.getElementById("payContainer").innerHTML = "pay: "+pay;
+      }
+    </script>
+  </body>
 </html>
