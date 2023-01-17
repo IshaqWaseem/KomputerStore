@@ -10,68 +10,211 @@
   </head>
   <body>
     <div id="top"><h1>Komputer store</h1></div>
+  
     <div id="stores">
       <div class="storeContainer">
         <h2>Joe Banker</h2>
-        <div id="balanceContainer">Balance:</div>
-        <div id="debtContainer"></div>
+        <div class="storeContent">
+
+            <div id="balanceContainer">Balance:</div>
+            <div id="debtContainer"></div>
+        </div>
 
         <button onclick="loanRequest()" id="loan">Get a loan</button>
       </div>
       <div class="storeContainer">
         <h2>Work</h2>
-        <div id="payContainer">Pay 0 kr</div>
-        <div id="workButtonsContainer">
-          <button id="bank">Bank</button>
-          <button id="work" onclick="work()">Work</button>
+        <div class="storeContent">
+
+            <div id="payContainer">Pay: 0</div>
+        </div>
+            <div id="workButtonsContainer">
+                <button id="repay" onclick="repay()">Repay</button>
+                <button id="bank" onclick="bank()">Bank</button>
+                <button id="work" onclick="work()">Work</button>
         </div>
       </div>
-      <div class="storeContainer">
+      <div id="laptopsContainer">
         <h2>Laptops</h2>
-        <div id="balanceContainer">dropdown</div>
+        <select name="laptops" id="laptops">
+          <option disabled selected value> -- select an option -- </option>
+        </select>
+        <p>Features:</p>
+        <div id="features"></div>
+      </div>
+      
+    </div>
+    <div id="laptopRow">
+      <div id="purchaseContainer">
+        <img id="pcImage" width="300" height="250px">
+        <div id="middleContainer">
 
-        <div id="features">Features:</div>
+          <h1 id="pcName">Pc name</h1>
+          <p id="pcDescription">description</p>
+        </div>
+        <div id="endContainer">
+          <h3 id="pcPrice">price</h3>
+          <button onclick="buy()" id="pcBuy">buy</button>
+        </div>
       </div>
     </div>
+    
+  
     <script>
+        //start with no debt, no pay and 350 balance
       let debt = 0;
       let loanAmount = 0;
-      let balance = 350;
-      //start with no debt and 350 balance
-      let maxLoan = balance*2
-      //set the loan limit to twice of current balance
-      document.getElementById("balanceContainer").innerHTML = "Balance: "+balance;
-      //initialize balance
-      function loanRequest(){
-          //function activated by loan button
-        loanAmount = prompt("Please enter how much you want to loan",maxLoan)
-            if (isNaN(loanAmount)) {
-                alert("Please type a valid number !!!");
-            }
-          else if (debt>0) {
-              alert("You are already in debt !!!");
-              //First priority is to not allow a second loan
-          }
-          
-          else if (loanAmount>maxLoan){
-              alert("Maximum loan amount is twice your balance !!!");
-              //Second test is the loan amount
-          }
-          else{
-            loanAmount = parseInt(loanAmount)
-              debt = loanAmount;
-              balance =(balance+loanAmount);
-              document.getElementById("debtContainer").innerHTML = "Debt: "+debt;
-              document.getElementById("balanceContainer").innerHTML = "Balance: "+balance;
-              //loan successfull, update variables and add them to HTML page
-          }
-      }
+      let balance = parseFloat(350);
+      let laptopPrice = 0;
       let pay = 0;
-      function work(){
-          if (debt==0){pay+=100}
-          else{pay+=90}
-          document.getElementById("payContainer").innerHTML = "pay: "+pay;
+      //salary is 100 by default
+      let salary = 100;
+      //set the loan limit to twice of current balance
+      let maxLoan = balance * 2;
+      //initialize balance
+      document.getElementById("balanceContainer").innerHTML =
+        "Balance: " + balance;
+      function loanRequest() {
+        loanAmount = prompt("Please enter how much you want to loan", maxLoan);
+        //input validation, only numbers allowed.
+        if (isNaN(loanAmount)) {
+          alert("Please type a valid number !!!");
+          //Dont allow another loan while still in debt
+        } else if (debt > 0) {
+          alert("You are already in debt !!!");
+          //Dont allow loan to be over the set debt limit
+        } else if (loanAmount > maxLoan) {
+          alert("Maximum loan amount is twice your balance !!!");
+        } else {
+          //loan successfull, update values and add them to HTML page
+          //converts the string to a float and then limits to 2 decimals, and converts to float again
+          loanAmount = parseFloat(loanAmount);
+          loanAmount = parseFloat(loanAmount.toFixed(2));
+      
+          debt = loanAmount;
+          balance = balance + loanAmount;
+          updateValues();
+        }
       }
+      function work() {
+        pay += salary;
+        updateValues();
+      }
+      function bank() {
+          //if no debt, add pay to balance and reset the pay
+        if (debt == 0) {
+          balance += pay;
+          pay = 0;
+
+          //if you have debt, add 90% of pay to balance and 10% toward debt
+        } else {
+          balance += 0.9 * pay;
+          debt -= 0.1 * pay;
+          pay = 0;
+          //if the debt becomes negative, add the negative as positive to balance
+          if (debt < 0) {
+            balance += debt * -1;
+            debt = 0;
+          }
+        }
+        updateValues();
+      }
+      //function which updates values through DOM manipulation
+      function updateValues() {
+        //limits decimals on 
+        balance = parseFloat(balance.toFixed(2));
+        document.getElementById("balanceContainer").innerHTML =
+          "Balance: " + balance;
+          
+        document.getElementById("payContainer").innerHTML = "Pay: " + pay;
+        pay = parseFloat(pay.toFixed(2));
+        //hide the debt and repay button if there is no debt
+        if (debt == 0) {
+          document.getElementById("debtContainer").style.display = "none";
+          document.getElementById("repay").style.display = "none";
+          //make the debt and repay button visible if there is debt
+        } else {
+          document.getElementById("repay").style.display = "block";
+          document.getElementById("debtContainer").style.display = "block";
+          debt = parseFloat(debt.toFixed(2));
+          document.getElementById("debtContainer").innerHTML = "Debt: " + debt;
+        }
+      }
+      //repay the debt using 100% of the pay this time
+      function repay() {
+        debt-=pay;
+        pay=0;
+        updateValues()
+        //if the debt is less than zero, add the negative number as positive to balance
+        if (debt < 0) {
+            balance += debt * -1;
+            debt = 0;
+            updateValues()
+          }
+      }
+      //make elements from HTML to references
+      const laptopSelect = document.getElementById("laptops")
+      const featuresElement = document.getElementById("features")
+      const imageElement = document.getElementById("pcImage")
+      const pcNameElement = document.getElementById("pcName")
+      const pcDescriptionElement = document.getElementById("pcDescription")
+      const pcPriceElement = document.getElementById("pcPrice")
+      //make an empty array which will be filled with laptops later
+      let laptops = [];
+      //fetch data from the API and send to a function 
+      fetch("https://hickory-quilled-actress.glitch.me/computers")
+      .then(response => response.json())
+      .then(data => laptops = data)
+      .then(laptops => addLaptopData(laptops));
+
+      //make a list with the data 
+      const addLaptopData = (laptops) => {
+        laptops.forEach( x=> addLaptop(x));
+      }
+      //fill the select with options from data
+      const addLaptop = (LaptopOption) =>{
+        const laptopElement = document.createElement("option");
+        laptopElement.value = LaptopOption.id;
+        laptopElement.appendChild(document.createTextNode(LaptopOption.title));
+        laptopSelect.appendChild(laptopElement)
+      }
+      //activate function when the select option is changed
+      const handleLaptopChange = e => {
+        //make the container visible
+        document.getElementById("purchaseContainer").style.display = "flex";
+        //connect the select option index to the data, "-1" required at the end due to the the existance of a default option in HTML
+        const selectedLaptop = laptops[e.target.selectedIndex-1];
+        //empty the current div feature 
+        featuresElement.innerText = "";
+        //add each feature with a line skipped per object in the data
+        for (const x in selectedLaptop.specs) {
+        featuresElement.innerHTML += selectedLaptop.specs[x] + "<br>";
+        //replace image
+        let imgUrl = selectedLaptop.image
+        imageElement.src="https://hickory-quilled-actress.glitch.me/"+imgUrl;
+        //update values for the laptop
+        pcNameElement.innerText=selectedLaptop.title
+        pcDescriptionElement.innerText=selectedLaptop.description
+        pcPriceElement.innerText=selectedLaptop.price
+        laptopPrice = selectedLaptop.price
+
+}
+      }
+      laptopSelect.addEventListener("change",handleLaptopChange);
+//function activated on the "buy" button in laptopContainer
+function buy() {
+    //do not allow a purchase if the funds are insufficient
+    if(balance<laptopPrice){
+      alert("TOO EXPENSIVE !!! Take a loan or work !")
+    }
+    else {
+      //take the money and update values
+      balance-=laptopPrice
+      updateValues();
+      alert("Congratulations, you now own a new laptop")
+    }
+}
+      
     </script>
   </body>
 </html>
